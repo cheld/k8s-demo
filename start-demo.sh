@@ -1,11 +1,11 @@
 #!/bin/bash
 cd $(dirname ${BASH_SOURCE})
-OC=bin/openshift-v3.7.2/oc
+OC=bin/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit/oc
 ISTIOCTL=bin/istio-0.7.1/bin/istioctl
 DIR_ISTIO=bin/istio-0.7.1
 
 
-# utils
+# wait util
 wait_for_pod(){
   while [ $(oc get pods --all-namespaces | grep $1 | wc -l) = "0" ]; do
       sleep 1
@@ -18,17 +18,23 @@ wait_for_pod(){
 }
 
 
-# Install Openshift
+# Download Openshift - its too large for git
+if [ ! -f $OC ]; then
+  curl -SL https://github.com/openshift/origin/releases/download/v3.7.2/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz | tar -xvzC bin/
+fi
+
+
+# Deploy Openshift
 $OC cluster up --service-catalog
 $OC login -u system:admin
 
-# Install Istio
+# Deploy Istio
 $OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z default -n istio-system
 $OC adm policy add-scc-to-user privileged -z default -n myproject
 $OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 
-# Install prometheus
+# Deploy prometheus
 $OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
 $OC apply -f $DIR_ISTIO/install/kubernetes/addons/prometheus.yaml
 wait_for_pod prometheus
@@ -40,7 +46,7 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/addons/grafana.yaml
 wait_for_pod grafana
 $OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
 
-# Install Logging
+# Deploy Logging
 $OC adm policy add-scc-to-user anyuid -z default -n logging
 $OC apply -f bin/logging-stack-openshiftv3.7.yaml
 wait_for_pod elasticsearch
@@ -48,12 +54,12 @@ wait_for_pod kibana
 $OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
 $ISTIOCTL create -f bin/fluentd-istio.yaml
 
-# Install Jeager
+# Deploy Jeager
 $OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
 wait_for_pod jaeger
 $OC port-forward -n istio-system $($OC get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
 
-# Install sample application
+# Deploy sample application
 $OC apply -f <($ISTIOCTL kube-inject --debug -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
 wait_for_pod ratings
 wait_for_pod reviews
