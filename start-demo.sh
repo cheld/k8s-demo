@@ -1,0 +1,73 @@
+#!/bin/bash
+cd $(dirname ${BASH_SOURCE})
+OC=bin/openshift-v3.7.2/oc
+ISTIOCTL=bin/istio-0.7.1/bin/istioctl
+DIR_ISTIO=bin/istio-0.7.1
+
+
+# utils
+wait_for_pod(){
+  while [ $(oc get pods --all-namespaces | grep $1 | wc -l) = "0" ]; do
+      sleep 1
+      echo "Waiting for pod $1 to be scheduled"
+  done
+  while [ $(oc get pod --all-namespaces -l app=$1 -o jsonpath='{.items[0].status.phase}') != 'Running' ]; do
+      sleep 1
+      echo "Waiting for pod $1 to come alive"
+  done
+}
+
+
+# Install Openshift
+$OC cluster up --service-catalog
+$OC login -u system:admin
+
+# Install Istio
+$OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
+$OC adm policy add-scc-to-user anyuid -z default -n istio-system
+$OC adm policy add-scc-to-user privileged -z default -n myproject
+$OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
+
+# Install prometheus
+$OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
+$OC apply -f $DIR_ISTIO/install/kubernetes/addons/prometheus.yaml
+wait_for_pod prometheus
+$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
+
+# Install grafana
+$OC adm policy add-scc-to-user anyuid -z grafana -n istio-system
+$OC apply -f $DIR_ISTIO/install/kubernetes/addons/grafana.yaml
+wait_for_pod grafana
+$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
+
+# Install Logging
+$OC adm policy add-scc-to-user anyuid -z default -n logging
+$OC apply -f bin/logging-stack-openshiftv3.7.yaml
+wait_for_pod elasticsearch
+wait_for_pod kibana
+$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+$ISTIOCTL create -f bin/fluentd-istio.yaml
+
+# Install Jeager
+$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
+wait_for_pod jaeger
+$OC port-forward -n istio-system $($OC get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
+
+# Install sample application
+$OC apply -f <($ISTIOCTL kube-inject --debug -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
+wait_for_pod ratings
+wait_for_pod reviews
+wait_for_pod productpage
+GATEWAY_PORT=$($OC get svc istio-ingress -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
+
+
+# Links
+echo
+echo "-------------------------------------------------------"
+echo "Openshift at https://127.0.0.1:8443"
+echo "Prometheus at http://localhost:9090"
+echo "Jaeger at http://localhost:16686"
+echo "Grafana at http://localhost:3000/dashboard/db/istio-dashboard"
+echo "Kiban at http://localhost:5601/"
+echo "Example at http://localhost:$GATEWAY_PORT/productpage"
+echo "--------------------------------------------------------"
