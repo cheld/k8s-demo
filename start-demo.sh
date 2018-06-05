@@ -35,16 +35,16 @@ $OC adm policy add-scc-to-user privileged -z default -n myproject
 $OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 
 # Deploy prometheus
-$OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
-$OC apply -f $DIR_ISTIO/install/kubernetes/addons/prometheus.yaml
-wait_for_pod prometheus
-$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
+#$OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
+#$OC apply -f $DIR_ISTIO/install/kubernetes/addons/prometheus.yaml
+#wait_for_pod prometheus
+#$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
 
 # Install grafana
-$OC adm policy add-scc-to-user anyuid -z grafana -n istio-system
-$OC apply -f $DIR_ISTIO/install/kubernetes/addons/grafana.yaml
-wait_for_pod grafana
-$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
+#$OC adm policy add-scc-to-user anyuid -z grafana -n istio-system
+#$OC apply -f $DIR_ISTIO/install/kubernetes/addons/grafana.yaml
+#wait_for_pod grafana
+#$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
 
 # Deploy Logging
 $OC adm policy add-scc-to-user anyuid -z default -n logging
@@ -55,16 +55,16 @@ $OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='
 $ISTIOCTL create -f bin/fluentd-istio.yaml
 
 # Deploy Jeager
-$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
-wait_for_pod jaeger
-$OC port-forward -n istio-system $($OC get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
+#$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
+#wait_for_pod jaeger
+#$OC port-forward -n istio-system $($OC get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
 
 # Deploy sample application
-$OC apply -f <($ISTIOCTL kube-inject --debug -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
-wait_for_pod ratings
-wait_for_pod reviews
-wait_for_pod productpage
-GATEWAY_PORT=$($OC get svc istio-ingress -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
+#$OC apply -f <($ISTIOCTL kube-inject --debug -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
+#wait_for_pod ratings
+#wait_for_pod reviews
+#wait_for_pod productpage
+#GATEWAY_PORT=$($OC get svc istio-ingress -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
 
 
 # Links
