@@ -16,13 +16,11 @@ All infrastructure is configured to work out-of-the-box.
 
 TODO:
 * Add service broker instance
-
-Known issues:
-* Elasticsearch not working for Openshift v3.7. (Issue and work-around described here: https://github.com/kubernetes/kubernetes/issues/2707) Disable logging part before running the script (or use Openshift3.9)
-
+* Check if port binding allows outside connections
+* Print URLs inluding IP instead of localhost
 
 Prerequisite:
-* Install Docker
+* Docker installed
 
 
 Install Demo:
