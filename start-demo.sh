@@ -34,10 +34,10 @@ $OC cluster up --service-catalog
 $OC login -u system:admin
 
 # Deploy Istio
-$OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
-$OC adm policy add-scc-to-user anyuid -z default -n istio-system
-$OC adm policy add-scc-to-user privileged -z default -n myproject
-$OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
+#$OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
+#$OC adm policy add-scc-to-user anyuid -z default -n istio-system
+#$OC adm policy add-scc-to-user privileged -z default -n myproject
+#$OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 
 # Deploy prometheus
 #$OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
@@ -52,12 +52,12 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 #$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
 
 # Deploy Logging
-$OC adm policy add-scc-to-user anyuid -z default -n logging
-$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
-wait_for_pod elasticsearch
-wait_for_pod kibana
-$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
-$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
+#$OC adm policy add-scc-to-user anyuid -z default -n logging
+#$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
+#wait_for_pod elasticsearch
+#wait_for_pod kibana
+#$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+#$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
 
 # Deploy Jeager
 #$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
