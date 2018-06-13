@@ -22,6 +22,10 @@ wait_for_pod(){
 if [ ! -f $OC ]; then
   curl -SL https://github.com/openshift/origin/releases/download/v3.7.2/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz | tar -xvzC bin/
 fi
+# Download Istio
+if [ ! -d $DIR_ISTIO ]; then
+  curl -SL https://github.com/istio/istio/releases/download/0.7.1/istio-0.7.1-linux.tar.gz | tar -xvzC bin/
+fi
 
 
 # Deploy Openshift
