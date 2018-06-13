@@ -1,0 +1,39 @@
+{
+  Name:          "example-ceiser-service",
+  ID:            "4f6e6cf6-ffdd-425f-a2c7-3c9258ad246a",
+  Description:   "New example service from the osb starter pack!",
+  Bindable:      true,
+  PlanUpdatable: truePtr(),
+  Metadata: map[string]interface{}{
+    "displayName": "Example ceiser backend service v2",
+    "imageUrl":    "https://cdn.iconverticons.com/files/png/0174d53a1a739691_256x256.png",
+  },
+  Plans: []osb.Plan{
+    {
+      Name:        "default",
+      ID:          "86064792-7ea2-467b-af93-ac9694d96d5b",
+      Description: "The default plan for the starter pack example service",
+      Free:        truePtr(),
+      Schemas: &osb.Schemas{
+        ServiceInstance: &osb.ServiceInstanceSchema{
+          Create: &osb.InputParametersSchema{
+            Parameters: map[string]interface{}{
+              "type": "object",
+              "properties": map[string]interface{}{
+                "color": map[string]interface{}{
+                  "type":    "string",
+                  "default": "Clear",
+                  "enum": []string{
+                    "Clear",
+                    "Magenta",
+                    "Grey",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+},
