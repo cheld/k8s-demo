@@ -3,6 +3,7 @@ cd $(dirname ${BASH_SOURCE})
 OC=bin/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit/oc
 ISTIOCTL=bin/istio-0.7.1/bin/istioctl
 DIR_ISTIO=bin/istio-0.7.1
+DIR_CONFIG=config/
 
 
 # wait util
@@ -52,11 +53,11 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 
 # Deploy Logging
 $OC adm policy add-scc-to-user anyuid -z default -n logging
-$OC apply -f bin/logging-stack-openshiftv3.7.yaml
+$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
 wait_for_pod elasticsearch
 wait_for_pod kibana
 $OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
-$ISTIOCTL create -f bin/fluentd-istio.yaml
+$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
 
 # Deploy Jeager
 #$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
