@@ -41,7 +41,7 @@ $OC login -u system:admin
 
 # Deploy Demo
 oc project demo-broker || oc new-project demo-broker
-oc process -f openshift/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
+oc process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
 
 # Deploy Istio
 #$OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
