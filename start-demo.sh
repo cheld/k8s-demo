@@ -1,10 +1,16 @@
 #!/bin/bash
 cd $(dirname ${BASH_SOURCE})
-OC=bin/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit/oc
-ISTIOCTL=bin/istio-0.7.1/bin/istioctl
-DIR_ISTIO=bin/istio-0.7.1
-DIR_CONFIG=config/
 
+# Configuration
+CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/catalog.json
+VERSION_OPENSHIFT=openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit
+VERSION_ISTIO=istio-0.7.1
+
+# Shortcuts
+OC=bin/$VERSION_OPENSHIFT/oc
+ISTIOCTL=bin/$VERSION_ISTIO/bin/istioctl
+DIR_ISTIO=bin/$VERSION_ISTIO
+DIR_CONFIG=config/
 
 # wait util
 wait_for_pod(){
@@ -32,6 +38,10 @@ fi
 # Deploy Openshift
 $OC cluster up --service-catalog
 $OC login -u system:admin
+
+# Deploy Demo
+oc project demo-broker || oc new-project demo-broker
+oc process -f openshift/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
 
 # Deploy Istio
 #$OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
