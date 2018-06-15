@@ -39,7 +39,7 @@ fi
 $OC cluster up --service-catalog
 $OC login -u system:admin
 
-# Deploy Demo
+# Deploy Broker Demo
 oc project demo-broker || oc new-project demo-broker
 oc process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
 

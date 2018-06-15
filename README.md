@@ -3,6 +3,7 @@
 This demo deploys:
 * Openshift 3.7
 * Service Catalog
+* Service Broker
 * Istio
 * Prometheus
 * Grafana
