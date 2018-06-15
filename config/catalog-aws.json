@@ -17,8 +17,8 @@
                      "create":{
                         "parameters":{
                            "properties":{
-                              "color":{
-                                 "type":"Standard",
+                              "type":{
+                                 "default":"Standard",
                                  "enum":[
                                     "Standard",
                                     "Infrequent access",
@@ -56,8 +56,8 @@
                      "create":{
                         "parameters":{
                            "properties":{
-                              "color":{
-                                 "type":"MySQL",
+                              "type":{
+                                 "default":"MySQL",
                                  "enum":[
                                     "MySQL",
                                     "MariaDB",
