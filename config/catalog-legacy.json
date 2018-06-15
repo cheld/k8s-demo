@@ -21,7 +21,7 @@
                                  "default":"B2C",
                                  "enum":[
                                     "B2C",
-                                    "B2B",
+                                    "B2B"
                                  ],
                                  "type":"string"
                               }
