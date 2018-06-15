@@ -40,6 +40,8 @@ $ ./stop-demo.sh
 
 ## Customize Service Catalog
 
+The service catalog broker implementation is taken from [`demo-broker`](https://github.com/cheld/demo-broker)
+
 The catalog content is retrieved from a URL. By default:
 
 ``
