@@ -2,7 +2,7 @@
 cd $(dirname ${BASH_SOURCE})
 
 # Configuration
-CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/catalog.json
+CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/catalog-aws.json
 VERSION_OPENSHIFT=openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit
 VERSION_ISTIO=istio-0.7.1
 
