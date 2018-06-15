@@ -17,7 +17,7 @@
                      "create":{
                         "parameters":{
                            "properties":{
-                              "Type":{
+                              "Market":{
                                  "default":"B2C",
                                  "enum":[
                                     "B2C",
