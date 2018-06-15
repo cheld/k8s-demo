@@ -15,7 +15,6 @@ This demo deploys:
 All infrastructure is configured to work out-of-the-box.
 
 TODO:
-* Add service broker instance
 * Check if port binding allows outside connections
 * Print URLs inluding IP instead of localhost
 
@@ -38,3 +37,13 @@ Clean up:
 ``
 $ ./stop-demo.sh
 ``
+
+## Customize Service Catalog
+
+The catalog content is retrieved from a URL. By default:
+
+``
+CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/catalog-legacy.json
+``
+
+Customize as needed. If you want to implement your own broker, than create a REST service that produces such a JSON as a first step.
