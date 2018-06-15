@@ -2,7 +2,7 @@
    "services":[
       {
          "id":"4f6e6cf6-ffdd-425f-a2c7-3c9258ad246a",
-         "name":"example-ceiser-service",
+         "name":"example-product-service",
          "description":"New example service from the osb starter pack!",
          "bindable":true,
          "plan_updateable":true,
@@ -17,12 +17,11 @@
                      "create":{
                         "parameters":{
                            "properties":{
-                              "color":{
-                                 "default":"Clear",
+                              "Type":{
+                                 "default":"B2C",
                                  "enum":[
-                                    "Clear",
-                                    "Magenta",
-                                    "Grey"
+                                    "B2C",
+                                    "B2B",
                                  ],
                                  "type":"string"
                               }
@@ -41,7 +40,7 @@
       },
       {
          "id":"4f6e6cf6-ffdd-425f-a2c7-3c9258ad246b",
-         "name":"example-ceiser-service",
+         "name":"example-customer-service",
          "description":"New example service from the osb starter pack!",
          "bindable":true,
          "plan_updateable":true,
@@ -56,12 +55,12 @@
                      "create":{
                         "parameters":{
                            "properties":{
-                              "color":{
-                                 "default":"Clear",
+                              "Region":{
+                                 "default":"EMEA",
                                  "enum":[
-                                    "Clear",
-                                    "Magenta",
-                                    "Grey"
+                                    "EMEA",
+                                    "APAC",
+                                    "AMERICA"
                                  ],
                                  "type":"string"
                               }
