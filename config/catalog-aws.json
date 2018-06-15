@@ -2,7 +2,7 @@
    "services":[
       {
          "id":"4f6e6cf6-ffdd-425f-a2c7-3c9258ad246a",
-         "name":"example-ceiser-service",
+         "name":"example-awss3-service",
          "description":"New example service from the osb starter pack!",
          "bindable":true,
          "plan_updateable":true,
@@ -41,7 +41,7 @@
       },
       {
          "id":"4f6e6cf6-ffdd-425f-a2c7-3c9258ad246b",
-         "name":"example-ceiser-service",
+         "name":"example-awsdb-service",
          "description":"New example service from the osb starter pack!",
          "bindable":true,
          "plan_updateable":true,
