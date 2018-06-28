@@ -2,7 +2,7 @@
 cd $(dirname ${BASH_SOURCE})
 
 # Clean
-rm images/*
+rm -f images/*
 #docker rmi -f $(docker images -q)
 
 # Start - stop to get all resources
