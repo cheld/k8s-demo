@@ -36,18 +36,18 @@ fi
 
 
 # Deploy Openshift
-$OC cluster up --service-catalog
+$OC cluster up #--service-catalog
 $OC login -u system:admin
 
 # Deploy Broker Demo
-oc project demo-broker || oc new-project demo-broker
-oc process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
+#oc project demo-broker || oc new-project demo-broker
+#oc process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
 
 # Deploy Istio
-#$OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
-#$OC adm policy add-scc-to-user anyuid -z default -n istio-system
-#$OC adm policy add-scc-to-user privileged -z default -n myproject
-#$OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
+$OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
+$OC adm policy add-scc-to-user anyuid -z default -n istio-system
+$OC adm policy add-scc-to-user privileged -z default -n myproject
+$OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 
 # Deploy prometheus
 #$OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system

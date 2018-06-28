@@ -1,2 +1,3 @@
-bin/openshift*
-bin/istio*
+bin/*
+images/*
+build/*
