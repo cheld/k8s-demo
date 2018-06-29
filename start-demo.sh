@@ -12,6 +12,9 @@ ISTIOCTL=bin/$VERSION_ISTIO/bin/istioctl
 DIR_ISTIO=bin/$VERSION_ISTIO
 DIR_CONFIG=config/
 
+# init
+mkdir -p bin
+
 # wait util
 wait_for_pod(){
   while [ $(oc get pods --all-namespaces | grep $1 | wc -l) = "0" ]; do
@@ -62,12 +65,12 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 #$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
 
 # Deploy Logging
-#$OC adm policy add-scc-to-user anyuid -z default -n logging
-#$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
-#wait_for_pod elasticsearch
-#wait_for_pod kibana
-#$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
-#$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
+$OC adm policy add-scc-to-user anyuid -z default -n logging
+$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
+wait_for_pod elasticsearch
+wait_for_pod kibana
+$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
 
 # Deploy Jeager
 #$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
