@@ -50,3 +50,11 @@ CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/cata
 ``
 
 Customize as needed. If you want to implement your own broker, than create a REST service that produces such a JSON as a first step.
+
+## Offline
+
+To run the demo on a target machine without internet connectivity:
+* open [releases](https://github.com/cheld/k8s-demo/releases) and manually transfer one package to the target machine
+* Unzip the downloaded package
+* Run the script `images-load.sh` to copy all Docker images from the downloaded package to the target machine.
+* Run the script `start.sh` to start the demo.
