@@ -20,7 +20,8 @@ TODO:
 * Print URLs inluding IP instead of localhost
 
 ## Host Preparation
-* Docker installed
+* Install Docker
+* Add user to [docker group](https://docs.docker.com/install/linux/linux-postinstall/) 
 * Update docker configuration for [insecure registry](https://about.gitlab.com/handbook/sales/idea-to-production-demo/setup/#insecure-local-registry-on-linux)
 
 ## Run Demo
