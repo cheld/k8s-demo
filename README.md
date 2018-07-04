@@ -23,6 +23,7 @@ TODO:
 * Install Docker
 * Add user to [docker group](https://docs.docker.com/install/linux/linux-postinstall/) 
 * Update docker configuration for [insecure registry](https://about.gitlab.com/handbook/sales/idea-to-production-demo/setup/#insecure-local-registry-on-linux)
+* Firewall modify iptables from Docker and kube-proxy. Please make sure that firewall does not cause troubles.
 
 ## Run Demo
 The demo is dockerized and does not modify the host. 
