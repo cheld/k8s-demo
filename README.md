@@ -38,6 +38,12 @@ Start Demo:
 $ ./start-demo.sh
 ``
 
+Check if everything is healthy:
+``
+$ ./bin/openshift*/oc get node localhost
+$ ./bin/openshift*/oc get pods --all-namespaces
+``
+
 Clean up:
 ``
 $ ./stop-demo.sh
