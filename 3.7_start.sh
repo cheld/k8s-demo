@@ -3,8 +3,8 @@ cd $(dirname ${BASH_SOURCE})
 
 # Configuration
 CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/catalog-aws.json
-VERSION_OPENSHIFT=openshift-origin-client-tools-v3.9.0-191fece-linux-64bit
-VERSION_ISTIO=istio-0.8.0
+VERSION_OPENSHIFT=openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit
+VERSION_ISTIO=istio-0.7.1
 
 # Shortcuts
 OC=bin/$VERSION_OPENSHIFT/oc
@@ -30,12 +30,11 @@ wait_for_pod(){
 
 # Download Openshift - its too large for git
 if [ ! -f $OC ]; then
-  curl -SL https://github.com/openshift/origin/releases/download/v3.9.0/openshift-origin-client-tools-v3.9.0-191fece-linux-64bit.tar.gz | tar -xvzC bin/
+  curl -SL https://github.com/openshift/origin/releases/download/v3.7.2/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz | tar -xvzC bin/
 fi
-
 # Download Istio
 if [ ! -d $DIR_ISTIO ]; then
-  curl -SL https://github.com/istio/istio/releases/download/0.8.0/istio-0.8.0-linux.tar.gz | tar -xvzC bin/
+  curl -SL https://github.com/istio/istio/releases/download/0.7.1/istio-0.7.1-linux.tar.gz | tar -xvzC bin/
 fi
 
 
@@ -50,21 +49,8 @@ $OC login -u system:admin
 # Deploy Istio
 $OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z default -n istio-system
-$OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
-$OC adm policy add-scc-to-user anyuid -z istio-egressgateway-service-account -n istio-system
-$OC adm policy add-scc-to-user anyuid -z istio-citadel-service-account -n istio-system
-$OC adm policy add-scc-to-user anyuid -z istio-ingressgateway-service-account -n istio-system
-
-$OC adm policy add-scc-to-user privileged -z istio-ingressgateway-service-account -n istio-system
-$OC adm policy add-scc-to-user hostnetwork -z istio-ingressgateway-service-account -n istio-system
-
-$OC adm policy add-scc-to-user anyuid -z istio-cleanup-old-ca-service-account -n istio-system
-$OC adm policy add-scc-to-user anyuid -z istio-mixer-post-install-account -n istio-system
-$OC adm policy add-scc-to-user anyuid -z istio-mixer-service-account -n istio-system
-$OC adm policy add-scc-to-user anyuid -z istio-pilot-service-account -n istio-system
-$OC adm policy add-scc-to-user anyuid -z istio-sidecar-injector-service-account -n istio-system
-
-$OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
+$OC adm policy add-scc-to-user privileged -z default -n myproject
+$OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 
 # Deploy prometheus
 #$OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
@@ -79,12 +65,12 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
 #$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
 
 # Deploy Logging
-#$OC adm policy add-scc-to-user anyuid -z default -n logging
-#$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
-#wait_for_pod elasticsearch
-#wait_for_pod kibana
-#$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
-#$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
+$OC adm policy add-scc-to-user anyuid -z default -n logging
+$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
+wait_for_pod elasticsearch
+wait_for_pod kibana
+$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
 
 # Deploy Jeager
 #$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
@@ -92,13 +78,11 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
 #$OC port-forward -n istio-system $($OC get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
 
 # Deploy sample application
-$OC adm policy add-scc-to-user anyuid -z default -n myproject
-$OC apply -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml
-$OC create -f $DIR_ISTIO/samples/bookinfo/routing/bookinfo-gateway.yaml
-wait_for_pod ratings
-wait_for_pod reviews
-wait_for_pod productpage
-#GATEWAY_PORT=$($OC get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
+#$OC apply -f <($ISTIOCTL kube-inject --debug -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
+#wait_for_pod ratings
+#wait_for_pod reviews
+#wait_for_pod productpage
+#GATEWAY_PORT=$($OC get svc istio-ingress -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
 
 
 # Links
@@ -109,6 +93,5 @@ echo "Prometheus at http://localhost:9090"
 echo "Jaeger at http://localhost:16686"
 echo "Grafana at http://localhost:3000/dashboard/db/istio-dashboard"
 echo "Kiban at http://localhost:5601/"
-echo "Example at http://127.0.0.1:$GATEWAY_PORT/productpage"
+echo "Example at http://localhost:$GATEWAY_PORT/productpage"
 echo "--------------------------------------------------------"
-
