@@ -93,12 +93,13 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
 
 # Deploy sample application
 $OC adm policy add-scc-to-user anyuid -z default -n myproject
-$OC apply -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml
+$OC adm policy add-scc-to-user privileged -z default -n myproject
+$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
 $OC create -f $DIR_ISTIO/samples/bookinfo/routing/bookinfo-gateway.yaml
+wait_for_pod productpage
 wait_for_pod ratings
 wait_for_pod reviews
-wait_for_pod productpage
-#GATEWAY_PORT=$($OC get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
+GATEWAY_PORT=$($OC get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
 
 
 # Links
