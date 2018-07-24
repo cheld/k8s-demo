@@ -39,12 +39,12 @@ fi
 
 
 # Deploy Openshift
-$OC cluster up #--service-catalog
+$OC cluster up --service-catalog
 $OC login -u system:admin
 
 # Deploy Broker Demo
-#oc project demo-broker || oc new-project demo-broker
-#oc process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
+oc project demo-broker || oc new-project demo-broker
+oc process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:4 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
 
 # Deploy Istio
 $OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
@@ -65,12 +65,12 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio.yaml
 #$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
 
 # Deploy Logging
-$OC adm policy add-scc-to-user anyuid -z default -n logging
-$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
-wait_for_pod elasticsearch
-wait_for_pod kibana
-$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
-$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
+#$OC adm policy add-scc-to-user anyuid -z default -n logging
+#$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
+#wait_for_pod elasticsearch
+#wait_for_pod kibana
+#$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+#$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
 
 # Deploy Jeager
 #$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
