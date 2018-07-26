@@ -17,11 +17,11 @@ mkdir -p bin
 
 # wait util
 wait_for_pod(){
-  while [ $(oc get pods --all-namespaces | grep $1 | wc -l) = "0" ]; do
+  while [ $($OC get pods --all-namespaces | grep $1 | wc -l) = "0" ]; do
       sleep 1
       echo "Waiting for pod $1 to be scheduled"
   done
-  while [ $(oc get pod --all-namespaces -l app=$1 -o jsonpath='{.items[0].status.phase}') != 'Running' ]; do
+  while [ $($OC get pod --all-namespaces -l app=$1 -o jsonpath='{.items[0].status.phase}') != 'Running' ]; do
       sleep 1
       echo "Waiting for pod $1 to come alive"
   done
@@ -44,8 +44,8 @@ $OC cluster up #--service-catalog
 $OC login -u system:admin
 
 # Deploy Broker Demo
-#oc project demo-broker || oc new-project demo-broker
-#oc process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
+#$OC project demo-broker || oc new-project demo-broker
+#$OC process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
 
 # Deploy Istio
 $OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
