@@ -94,22 +94,32 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
 # Deploy sample application
 $OC adm policy add-scc-to-user anyuid -z default -n myproject
 $OC adm policy add-scc-to-user privileged -z default -n myproject
-$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
-$OC create -f $DIR_ISTIO/samples/bookinfo/routing/bookinfo-gateway.yaml
-wait_for_pod productpage
-wait_for_pod ratings
-wait_for_pod reviews
-GATEWAY_PORT=$($OC get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
+#$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
+#$OC create -f $DIR_ISTIO/samples/bookinfo/routing/bookinfo-gateway.yaml
+#wait_for_pod productpage
+#wait_for_pod ratings
+#wait_for_pod reviews
+
+# Set variables
+HOST_IP=$(kubectl get po -l istio=ingressgateway -n istio-system -o 'jsonpath={.items[0].status.hostIP}')
+#GATEWAY_PORT=$($OC get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
+INGRESS_HOST=$HOST_IP
+INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
+SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
 
 
 # Links
 echo
 echo "-------------------------------------------------------"
-echo "Openshift at https://127.0.0.1:8443"
-echo "Prometheus at http://localhost:9090"
-echo "Jaeger at http://localhost:16686"
-echo "Grafana at http://localhost:3000/dashboard/db/istio-dashboard"
-echo "Kiban at http://localhost:5601/"
-echo "Example at http://127.0.0.1:$GATEWAY_PORT/productpage"
+echo "Openshift at https://$HOST_IP:8443"
+echo "Prometheus at http://$HOST_IP:9090"
+echo "Jaeger at http://$HOST_IP:16686"
+echo "Grafana at http://$HOST_IP:3000/dashboard/db/istio-dashboard"
+echo "Kiban at http://$HOST_IP:5601/"
+echo "Example at http://$HOST_IP:$GATEWAY_PORT/productpage"
 echo "--------------------------------------------------------"
+echo "export INGRESS_HOST=$INGRESS_HOST"
+echo "export INGRESS_PORT=$INGRESS_PORT"
+echo "export SECURE_INGRESS_PORT=$SECURE_INGRESS_PORT"
+
 
