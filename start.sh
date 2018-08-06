@@ -108,18 +108,29 @@ INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonp
 SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
 
 
-# Links
+# Output for easy usage
+echo 
 echo
-echo "-------------------------------------------------------"
+echo
+echo "-----------------------Links----------------------------"
 echo "Openshift at https://$HOST_IP:8443"
 echo "Prometheus at http://$HOST_IP:9090"
 echo "Jaeger at http://$HOST_IP:16686"
 echo "Grafana at http://$HOST_IP:3000/dashboard/db/istio-dashboard"
 echo "Kiban at http://$HOST_IP:5601/"
 echo "Example at http://$HOST_IP:$GATEWAY_PORT/productpage"
-echo "--------------------------------------------------------"
+echo
+echo "----------------------Variables-------------------------"
 echo "export INGRESS_HOST=$INGRESS_HOST"
 echo "export INGRESS_PORT=$INGRESS_PORT"
 echo "export SECURE_INGRESS_PORT=$SECURE_INGRESS_PORT"
+echo
+echo "-------------------------Bin----------------------------"
+echo "sudo ln -sfn `pwd`/$OC /usr/local/bin/oc"
+echo "sudo ln -sfn `pwd`/$ISTIOCTL /usr/local/bin/istioctl"
+echo
+echo
+echo
+
 
 
