@@ -4,7 +4,7 @@ cd $(dirname ${BASH_SOURCE})
 # Configuration
 CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/catalog-aws.json
 VERSION_OPENSHIFT=openshift-origin-client-tools-v3.9.0-191fece-linux-64bit
-VERSION_ISTIO=istio-0.8.0
+VERSION_ISTIO=istio-1.0.0
 
 # Shortcuts
 OC=bin/$VERSION_OPENSHIFT/oc
@@ -35,7 +35,7 @@ fi
 
 # Download Istio
 if [ ! -d $DIR_ISTIO ]; then
-  curl -SL https://github.com/istio/istio/releases/download/0.8.0/istio-0.8.0-linux.tar.gz | tar -xvzC bin/
+  curl -SL https://github.com/istio/istio/releases/download/1.0.0/istio-1.0.0-linux.tar.gz | tar -xvzC bin/
 fi
 
 
@@ -104,7 +104,7 @@ $OC adm policy add-scc-to-user privileged -z default -n myproject
 HOST_IP=$(kubectl get po -l istio=ingressgateway -n istio-system -o 'jsonpath={.items[0].status.hostIP}')
 #GATEWAY_PORT=$($OC get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
 INGRESS_HOST=$HOST_IP
-INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
+INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
 SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
 
 
