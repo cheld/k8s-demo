@@ -47,6 +47,17 @@ $OC login -u system:admin
 #$OC project demo-broker || oc new-project demo-broker
 #$OC process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
 
+
+
+
+
+
+
+
+
+
+
+
 # Deploy Istio
 $OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z default -n istio-system
@@ -54,15 +65,15 @@ $OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
 $OC adm policy add-scc-to-user anyuid -z istio-egressgateway-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z istio-citadel-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z istio-ingressgateway-service-account -n istio-system
-
-$OC adm policy add-scc-to-user privileged -z istio-ingressgateway-service-account -n istio-system
-$OC adm policy add-scc-to-user hostnetwork -z istio-ingressgateway-service-account -n istio-system
-
 $OC adm policy add-scc-to-user anyuid -z istio-cleanup-old-ca-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z istio-mixer-post-install-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z istio-mixer-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z istio-pilot-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z istio-sidecar-injector-service-account -n istio-system
+$OC adm policy add-scc-to-user anyuid -z istio-galley-service-account -n istio-system
+
+#$OC adm policy add-scc-to-user privileged -z istio-ingressgateway-service-account -n istio-system
+#$OC adm policy add-scc-to-user hostnetwork -z istio-ingressgateway-service-account -n istio-system
 
 $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
 
