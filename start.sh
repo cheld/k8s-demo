@@ -48,16 +48,6 @@ $OC login -u system:admin
 #$OC process -f $DIR_CONFIG/demo-broker-insecure.yaml -p IMAGE=docker.io/cheld/demobroker:3 -p CATALOG_PATH=$CATALOG_PATH | oc apply -f -
 
 
-
-
-
-
-
-
-
-
-
-
 # Deploy Istio
 $OC adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
 $OC adm policy add-scc-to-user anyuid -z default -n istio-system
@@ -105,11 +95,11 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
 # Deploy sample application
 $OC adm policy add-scc-to-user anyuid -z default -n myproject
 $OC adm policy add-scc-to-user privileged -z default -n myproject
-#$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/kube/bookinfo.yaml)
-#$OC create -f $DIR_ISTIO/samples/bookinfo/routing/bookinfo-gateway.yaml
-#wait_for_pod productpage
-#wait_for_pod ratings
-#wait_for_pod reviews
+$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/platform/kube/bookinfo.yaml)                                           
+$OC create -f $DIR_ISTIO/samples/bookinfo/routing/bookinfo-gateway.yaml
+wait_for_pod productpage
+wait_for_pod ratings
+wait_for_pod reviews
 
 # Set variables
 HOST_IP=$(kubectl get po -l istio=ingressgateway -n istio-system -o 'jsonpath={.items[0].status.hostIP}')
