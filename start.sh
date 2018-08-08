@@ -88,7 +88,6 @@ $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
 #$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
 
 # Deploy Jeager
-#$OC apply -n istio-system -f https://raw.githubusercontent.com/jaegertracing/jaeger-kubernetes/master/all-in-one/jaeger-all-in-one-template.yml
 #wait_for_pod jaeger
 #$OC port-forward -n istio-system $($OC get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
 
