@@ -5,6 +5,7 @@ cd $(dirname ${BASH_SOURCE})
 CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/catalog-aws.json
 VERSION_OPENSHIFT=openshift-origin-client-tools-v3.9.0-191fece-linux-64bit
 VERSION_ISTIO=istio-1.0.0
+HOST_IP=$(/sbin/ip route | awk '/default/ { print $3 }')
 
 # Shortcuts
 OC=bin/$VERSION_OPENSHIFT/oc
@@ -40,7 +41,7 @@ fi
 
 
 # Deploy Openshift
-$OC cluster up #--service-catalog
+$OC cluster up --skip-registry-check=true --public-hostname=$HOST_IP #--service-catalog
 $OC login -u system:admin
 
 # Deploy Broker Demo
@@ -66,43 +67,29 @@ $OC adm policy add-scc-to-user anyuid -z istio-galley-service-account -n istio-s
 #$OC adm policy add-scc-to-user hostnetwork -z istio-ingressgateway-service-account -n istio-system
 
 $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
-
-# Deploy prometheus
-#$OC adm policy add-scc-to-user anyuid -z prometheus -n istio-system
-#$OC apply -f $DIR_ISTIO/install/kubernetes/addons/prometheus.yaml
-#wait_for_pod prometheus
-#$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
-
-# Install grafana
-#$OC adm policy add-scc-to-user anyuid -z grafana -n istio-system
-#$OC apply -f $DIR_ISTIO/install/kubernetes/addons/grafana.yaml
-#wait_for_pod grafana
-#$OC -n istio-system port-forward $($OC -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
+#wait_for_pod istio-pilot
+#wait_for_pod istio-tracing
+wait_for_pod prometheus
+wait_for_pod grafana
 
 # Deploy Logging
 #$OC adm policy add-scc-to-user anyuid -z default -n logging
-#$OC apply -f $DIR_CONFIG/logging-stack-openshiftv3.7.yaml
+#$OC apply -f $DIR_CONFIG/logging-stack.yaml
+#$OC create -f $DIR_CONFIG/fluentd-istio.yaml
 #wait_for_pod elasticsearch
 #wait_for_pod kibana
-#$OC -n logging port-forward $($OC -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
-#$ISTIOCTL create -f $DIR_CONFIG/fluentd-istio.yaml
 
-# Deploy Jeager
-#wait_for_pod jaeger
-#$OC port-forward -n istio-system $($OC get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
 
 # Deploy sample application
-$OC adm policy add-scc-to-user anyuid -z default -n myproject
-$OC adm policy add-scc-to-user privileged -z default -n myproject
-$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/platform/kube/bookinfo.yaml)                                           
-$OC create -f $DIR_ISTIO/samples/bookinfo/routing/bookinfo-gateway.yaml
-wait_for_pod productpage
-wait_for_pod ratings
-wait_for_pod reviews
+#$OC adm policy add-scc-to-user anyuid -z default -n myproject
+#$OC adm policy add-scc-to-user privileged -z default -n myproject
+#$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/platform/kube/bookinfo.yaml)                                           
+#$OC create -f $DIR_ISTIO/samples/bookinfo/networking/bookinfo-gateway.yaml
+#wait_for_pod productpage
+#wait_for_pod ratings
+#wait_for_pod reviews
 
 # Set variables
-HOST_IP=$(kubectl get po -l istio=ingressgateway -n istio-system -o 'jsonpath={.items[0].status.hostIP}')
-#GATEWAY_PORT=$($OC get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')
 INGRESS_HOST=$HOST_IP
 INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
 SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
@@ -111,26 +98,37 @@ SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -
 # Output for easy usage
 echo 
 echo
+echo "-------------------------Bin----------------------------"
+echo "sudo ln -sfn `pwd`/$OC /usr/local/bin/oc"
+echo "sudo ln -sfn `pwd`/$ISTIOCTL /usr/local/bin/istioctl"
 echo
-echo "-----------------------Links----------------------------"
-echo "Openshift at https://$HOST_IP:8443"
-echo "Prometheus at http://$HOST_IP:9090"
-echo "Jaeger at http://$HOST_IP:16686"
-echo "Grafana at http://$HOST_IP:3000/dashboard/db/istio-dashboard"
-echo "Kiban at http://$HOST_IP:5601/"
-echo "Example at http://$HOST_IP:$GATEWAY_PORT/productpage"
+echo "-----------------------Tools----------------------------"
+echo "Prometeus"
+echo "oc -n istio-system port-forward $(oc -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &"
+echo "http://localhost:9090/graph#%5B%7B%22range_input%22%3A%221h%22%2C%22expr%22%3A%22istio_double_request_count%22%2C%22tab%22%3A1%7D%5D"
+echo "Jaeger"
+echo "oc port-forward -n istio-system $(oc get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &"
+echo "http://localhost:16686"
+echo "Grafana"
+echo "oc -n istio-system port-forward $(oc -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &"
+echo "http://localhost:3000/dashboard/db/istio-mesh-dashboard"
+echo "Kibana"
+echo "oc -n logging port-forward \$(oc -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &"
+echo "http://localhost:5601/"
 echo
 echo "----------------------Variables-------------------------"
 echo "export INGRESS_HOST=$INGRESS_HOST"
 echo "export INGRESS_PORT=$INGRESS_PORT"
 echo "export SECURE_INGRESS_PORT=$SECURE_INGRESS_PORT"
 echo
-echo "-------------------------Bin----------------------------"
-echo "sudo ln -sfn `pwd`/$OC /usr/local/bin/oc"
-echo "sudo ln -sfn `pwd`/$ISTIOCTL /usr/local/bin/istioctl"
+echo
+echo "-----------------------Links----------------------------"
+echo "Openshift at https://$HOST_IP:8443"
+echo "Example at http://$HOST_IP:$INGRESS_PORT/productpage"
 echo
 echo
 echo
 
-
+# Free disk space
+# du -s -m -x -h * | sort -n
 
