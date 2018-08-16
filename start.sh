@@ -2,16 +2,17 @@
 cd $(dirname ${BASH_SOURCE})
 
 # Environment
-source config/environment.cfg
+source config/env.cfg
 echo "------------------------------------------------"
 echo "The following environment configuration is used"
+echo "Update config/env.cfg if needed"
+echo
 echo "Public hostname: $PUBLIC_HOST_NAME"
 echo "Host IP: $HOST_IP"
-echo "Update config/environment.cfg if needed"
 echo "------------------------------------------------"
 echo 
 echo
-sleep 1
+
 
 # Configuration
 CATALOG_PATH=https://raw.githubusercontent.com/cheld/k8s-demo/master/config/catalog-aws.json

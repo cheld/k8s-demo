@@ -2,4 +2,3 @@ bin/*
 images/*
 build/*
 remote-access.txt
-config/environment.cfg
