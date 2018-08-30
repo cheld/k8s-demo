@@ -2,11 +2,12 @@
 cd $(dirname ${BASH_SOURCE})
 
 # Environment
+HOST_IP=$(/sbin/ip route | awk '/default/ { print $3 }')
+PUBLIC_HOST_NAME=localhost
 source config/env.cfg
 echo "------------------------------------------------"
 echo "The following environment configuration is used"
-echo "Update config/env.cfg if needed"
-echo
+echo "Create local config/env.cfg to overwrite"
 echo "Public hostname: $PUBLIC_HOST_NAME"
 echo "Host IP: $HOST_IP"
 echo "------------------------------------------------"
@@ -28,18 +29,6 @@ DIR_CONFIG=config/
 
 # init
 mkdir -p bin
-
-# wait util
-wait_for_pod(){
-  while [ $($OC get pods --all-namespaces | grep $1 | wc -l) = "0" ]; do
-      sleep 1
-      echo "Waiting for pod $1 to be scheduled"
-  done
-  while [ $($OC get pod --all-namespaces -l app=$1 -o jsonpath='{.items[0].status.phase}') != 'Running' ]; do
-      sleep 1
-      echo "Waiting for pod $1 to come alive"
-  done
-}
 
 
 # Download Openshift - its too large for git
@@ -80,31 +69,37 @@ $OC adm policy add-scc-to-user anyuid -z istio-galley-service-account -n istio-s
 #$OC adm policy add-scc-to-user hostnetwork -z istio-ingressgateway-service-account -n istio-system
 
 $OC apply -f $DIR_ISTIO/install/kubernetes/istio-demo.yaml
-#wait_for_pod istio-pilot
-#wait_for_pod istio-tracing
-wait_for_pod prometheus
-wait_for_pod grafana
+
+# Wait until everything is deployed
+$OC rollout status -w deployment/istio-pilot && \
+$OC rollout status -w deployment/istio-mixer && \
+$OC rollout status -w deployment/istio-ca && \
+$OC rollout status -w deployment/istio-ingress && \
+$OC rollout status -w deployment/prometheus && \
+$OC rollout status -w deployment/grafana && \
+$OC rollout status -w deployment/servicegraph && \
+$OC rollout status -w deployment/jaeger-deployment
 
 # Deploy Logging
 #$OC adm policy add-scc-to-user anyuid -z default -n logging
 #$OC apply -f $DIR_CONFIG/logging-stack.yaml
 #$OC create -f $DIR_CONFIG/fluentd-istio.yaml
-#wait_for_pod elasticsearch
-#wait_for_pod kibana
-
 
 # General settings for test playground
 $OC adm policy add-scc-to-user anyuid -z default -n myproject
 $OC adm policy add-scc-to-user privileged -z default -n myproject
-oc adm policy add-cluster-role-to-user cluster-admin admin
+#$OC adm policy add-cluster-role-to-user admin admin -n istio-system
+$OC adm policy add-role-to-user admin admin -n istio-system
+$OC adm policy add-role-to-user admin admin -n myproject
 
 
 # Deploy sample application
-#$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/platform/kube/bookinfo.yaml)                                           
-#$OC create -f $DIR_ISTIO/samples/bookinfo/networking/bookinfo-gateway.yaml
-#wait_for_pod productpage
-#wait_for_pod ratings
-#wait_for_pod reviews
+$OC apply -f <($ISTIOCTL kube-inject -f $DIR_ISTIO/samples/bookinfo/platform/kube/bookinfo.yaml)                                           
+$OC create -f $DIR_ISTIO/samples/bookinfo/networking/bookinfo-gateway.yaml
+$OC rollout status -w deployment/productpage && \
+$OC rollout status -w deployment/ratings && \
+$OC rollout status -w deployment/reviews
+
 
 # Output for easy usage
 echo 
